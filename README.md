@@ -24,6 +24,23 @@ tournament schedule and rankings snapshots.
 4. **Vercel → Project → Settings → Environment Variables**: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase → Project Settings → API Keys).
 5. **Vercel → Settings → Build & Development**: Framework Preset = Next.js. Redeploy.
 
+## Entry lists
+
+`PSA Entry Sync` (the `psa-entry-sync` folder) is a Chrome extension that reads the
+entry list of every upcoming tournament from SecurePSA, using the login already
+open in the browser, and posts them to `/api/entries/ingest`. It never sees or
+stores a PSA password; it authenticates to the planner with a per-account ingest
+token shown under Settings -> Entry lists.
+
+- `supabase/entries.sql` — `entry_lists` (current), `entry_list_snapshots`
+  (history, written only when a list actually changes), the `ingest_token`
+  column, and `ingest_entry_lists()`, the SECURITY DEFINER function that is the
+  only write path.
+- `app/api/entries/ingest/route.js` — validates the token and forwards to that
+  function. Needs no extra environment variables.
+- Install the extension with chrome://extensions -> Developer mode -> Load
+  unpacked, pointing at the `psa-entry-sync` folder.
+
 ## Local development
 
 ```

@@ -16,6 +16,7 @@ create table if not exists public.rankings (
   average           numeric,
   played            int,
   divisor           int,
+  capture_id        text,
   captured_at       timestamptz not null default now(),
   primary key (division, rank, name)     -- the tail is full of shared ranks
 );
@@ -27,15 +28,24 @@ drop policy if exists "rankings: read all" on public.rankings;
 create policy "rankings: read all" on public.rankings
   for select to authenticated using (true);
 
+-- Migration, for anyone who already ran the first version of this file.
+alter table public.rankings add column if not exists capture_id text;
+
 -- 2. The only write path. Same ingest token as the entry lists.
---    The extension sends the list in pages; the last call for a division sets
---    p_final, which clears whatever is left over from the previous capture.
+--    The extension sends the list in pages, all tagged with one capture id; the
+--    last call for a division sets p_final, which deletes every row for that
+--    division this capture did not write. Keying the cleanup on the capture
+--    rather than on the ranking date means re-running the same week's list
+--    replaces it, instead of leaving the previous attempt's rows behind.
+drop function if exists public.ingest_rankings(text, text, date, jsonb, boolean);
+
 create or replace function public.ingest_rankings(
-  p_token     text,
-  p_division  text,
-  p_ranked_on date,
-  p_rows      jsonb,
-  p_final     boolean default false)
+  p_token      text,
+  p_division   text,
+  p_ranked_on  date,
+  p_rows       jsonb,
+  p_final      boolean default false,
+  p_capture_id text default null)
 returns jsonb
 language plpgsql
 security definer
@@ -73,7 +83,7 @@ begin
 
     insert into public.rankings (
       division, rank, name, ranked_on, country, player_ranking_id,
-      total, counting, average, played, divisor, captured_at)
+      total, counting, average, played, divisor, capture_id, captured_at)
     values (
       p_division,
       (v_row->>'rank')::int,
@@ -86,6 +96,7 @@ begin
       nullif(v_row->>'average', '')::numeric,
       nullif(v_row->>'played', '')::int,
       nullif(v_row->>'divisor', '')::int,
+      p_capture_id,
       now())
     on conflict (division, rank, name) do update set
       ranked_on         = excluded.ranked_on,
@@ -96,12 +107,18 @@ begin
       average           = excluded.average,
       played            = excluded.played,
       divisor           = excluded.divisor,
+      capture_id        = excluded.capture_id,
       captured_at       = excluded.captured_at;
   end loop;
 
   if p_final then
-    delete from public.rankings
-    where division = p_division and ranked_on <> p_ranked_on;
+    if p_capture_id is null then
+      delete from public.rankings
+      where division = p_division and ranked_on <> p_ranked_on;
+    else
+      delete from public.rankings
+      where division = p_division and capture_id is distinct from p_capture_id;
+    end if;
     get diagnostics v_removed = row_count;
   end if;
 
@@ -109,7 +126,7 @@ begin
   return jsonb_build_object('received', v_count, 'removed', v_removed, 'stored', v_total);
 end $$;
 
-grant execute on function public.ingest_rankings(text, text, date, jsonb, boolean) to anon, authenticated;
+grant execute on function public.ingest_rankings(text, text, date, jsonb, boolean, text) to anon, authenticated;
 
 -- 3. What the planner shows under Settings: how fresh each tour's list is.
 create or replace function public.rankings_summary()

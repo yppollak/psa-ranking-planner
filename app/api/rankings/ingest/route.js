@@ -50,12 +50,17 @@ export async function POST(request){
     { auth: { persistSession: false, autoRefreshToken: false } }
   );
 
+  // One id per division per run, so the final call can delete exactly the rows
+  // this capture did not write — including a previous attempt at the same week.
+  const captureId = String((body && body.capture_id) || "").slice(0, 64) || null;
+
   const { data, error } = await supabase.rpc("ingest_rankings", {
     p_token: token,
     p_division: division,
     p_ranked_on: rankedOn,
     p_rows: rows,
     p_final: !!(body && body.final),
+    p_capture_id: captureId,
   });
 
   if(error){

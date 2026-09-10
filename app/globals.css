@@ -1,7 +1,7 @@
 
 :root{
   --ground:#F3F3EE; --surface:#FFFFFF; --surface-2:#EBECE5; --ink:#171F1B; --muted:#646D67; --line:#D6D9D0; --line-strong:#B9BDB2;
-  --accent:#B5302E; --accent-ink:#FFFFFF; --yes:#2E7D4F; --yes-soft:#D5EBDC; --plan:#C8761B; --plan-soft:#F7E3C7;
+  --accent:#B5302E; --accent-ink:#FFFFFF; --yes:#2E7D4F; --yes-soft:#D5EBDC; --plan:#C8761B; --plan-soft:#F7E3C7; --dl-ink:#5A6167;
   --today:#1B2430; --year:#B5302E; --focus:#2A62C9;
   --t1:#DFF0D8; --t2:#E9EFD3; --t3:#F6EFCB; --t4:#F5E2CE; --t5:#F3D6D6;
   --t1-ink:#245C34; --t2-ink:#4E6220; --t3-ink:#6E5A12; --t4-ink:#7A4818; --t5-ink:#7F2A2A;
@@ -11,7 +11,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ground:#12161A; --surface:#1A2026; --surface-2:#222A31; --ink:#E6E9E2; --muted:#9AA39C; --line:#2E363D; --line-strong:#465059;
-    --accent:#E0524F; --accent-ink:#14100F; --yes:#5FBF86; --yes-soft:#1F3A2B; --plan:#E8A04E; --plan-soft:#4A3418;
+    --accent:#E0524F; --accent-ink:#14100F; --yes:#5FBF86; --yes-soft:#1F3A2B; --plan:#E8A04E; --plan-soft:#4A3418; --dl-ink:#A7AFB6;
     --today:#E6E9E2; --year:#E0524F; --focus:#7FA8F0;
     --t1:#22402C; --t2:#2E3B22; --t3:#443B1A; --t4:#48311C; --t5:#4A2424;
     --t1-ink:#9BD9B0; --t2-ink:#C2D48A; --t3-ink:#E3CC7A; --t4-ink:#E6B383; --t5-ink:#EFA0A0;
@@ -20,7 +20,7 @@
 }
 :root[data-theme="dark"]{
   --ground:#12161A; --surface:#1A2026; --surface-2:#222A31; --ink:#E6E9E2; --muted:#9AA39C; --line:#2E363D; --line-strong:#465059;
-  --accent:#E0524F; --accent-ink:#14100F; --yes:#5FBF86; --yes-soft:#1F3A2B; --plan:#E8A04E; --plan-soft:#4A3418;
+  --accent:#E0524F; --accent-ink:#14100F; --yes:#5FBF86; --yes-soft:#1F3A2B; --plan:#E8A04E; --plan-soft:#4A3418; --dl-ink:#A7AFB6;
   --today:#E6E9E2; --year:#E0524F; --focus:#7FA8F0;
   --t1:#22402C; --t2:#2E3B22; --t3:#443B1A; --t4:#48311C; --t5:#4A2424;
   --t1-ink:#9BD9B0; --t2-ink:#C2D48A; --t3-ink:#E3CC7A; --t4-ink:#E6B383; --t5-ink:#EFA0A0;
@@ -56,19 +56,43 @@ h1,h2,h3{margin:0;font-family:var(--display);font-weight:600;letter-spacing:.01e
 .tile .eyebrow{font-size:11px}
 .tile .v{font-family:var(--display);font-size:30px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .tile .d{font-size:12px;color:var(--muted)}
-.tile.rank .v{color:var(--accent)}
-.tile .delta{font-size:12px;font-weight:600}
-.delta.up{color:var(--yes)} .delta.down{color:var(--accent)}
+.tile.rank .v{color:var(--ink)}
+.tile .delta{display:inline-block;align-self:flex-start;margin-top:3px;padding:2px 7px;border-radius:4px;
+  font-size:11px;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums;
+  background:var(--surface-2);color:var(--muted)}
+.tile .delta.up{background:var(--yes-soft);color:var(--yes)}
+.tile .delta.down{background:color-mix(in srgb, var(--accent) 16%, var(--surface));color:var(--accent)}
+.tile .delta.flat{background:var(--surface-2);color:var(--muted)}
+.clashbar{margin:0 0 12px;padding:9px 12px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);font-size:13px}
+.clashbar[hidden]{display:none}
+.clashbar .row{display:flex;gap:8px;align-items:baseline;padding:2px 0}
+.clashbar .tag{flex:none;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:3px}
+.clashbar .tag.hard{background:var(--accent);color:#fff}
+.clashbar .more{color:var(--muted);font-style:italic}
+.clashbar .tag.soft{background:var(--plan);color:#fff}
+.rowtag{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:1px 5px;border-radius:3px;color:#fff;vertical-align:1px;white-space:nowrap}
+.rowtag.hard{background:var(--accent)} .rowtag.soft{background:var(--plan)}
+.cardnote{max-width:1400px;margin:6px auto 0;padding:0 20px;font-size:12px;color:var(--muted)}
+.cardnote[hidden]{display:none}
+/* The figure takes the colour; the movement sits under it in a small chip.
+   Square corners, to agree with the cards and the tables rather than read as a tag. */
+.tile.good .v{color:var(--yes)} .tile.bad .v{color:var(--accent)}
+tr.dropped td{color:var(--muted)}
+.delta{white-space:nowrap}
 .strip-note{max-width:1400px;margin:6px auto 0;padding:0 20px;font-size:12px;color:var(--muted)}
 /* Pinned summary: the numbers you are watching stay put while you edit rows. */
 #pinbar{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--surface);
   border-bottom:1px solid var(--line-strong);box-shadow:0 2px 10px rgba(0,0,0,.06)}
 #pinbar[hidden]{display:none}
-#pinbar .in{max-width:1400px;margin:0 auto;padding:8px 20px;display:flex;align-items:baseline;gap:22px;flex-wrap:wrap}
-#pinbar .m{display:flex;align-items:baseline;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+#pinbar .in{max-width:1400px;margin:0 auto;padding:8px 20px;display:flex;align-items:baseline;gap:0;flex-wrap:wrap}
+#pinbar .m{display:flex;align-items:baseline;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap;
+  padding:0 20px;border-right:1px solid var(--line)}
+#pinbar .m:first-child{padding-left:0}
+#pinbar .m .dl{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--dl-ink)}
 #pinbar .m b{font-size:17px;color:var(--ink);font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums}
-#pinbar .m.rank b{color:var(--accent)}
-#pinbar .who{margin-left:auto;font-size:12px;color:var(--muted)}
+#pinbar .m b.up{color:var(--yes)} #pinbar .m b.down{color:var(--accent)}
+#pinbar .who{margin-left:auto;padding-left:20px;font-size:12px;color:var(--muted)}
 #pinbar .tabsrow{border-top:1px solid var(--line);max-width:1400px;margin:0 auto;padding:0 20px;display:flex;gap:2px;overflow-x:auto}
 #pinbar .tabsrow button{padding:7px 13px;border:0;background:none;font:inherit;font-size:13px;font-weight:500;
   color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}

@@ -1,5 +1,5 @@
 import "./globals.css";
-export const metadata = { title: "PSA Ranking Planner", description: "Which tournaments to enter — points, defending, divisor and travel, for PSA squash players." };
+export const metadata = { title: "Tour Advisor", description: "Which tournaments to enter — points, defending, divisor and travel, for professional squash players.", icons: { icon: "/icon.svg" } };
 export default function RootLayout({ children }){
   return (
     <html lang="en">
